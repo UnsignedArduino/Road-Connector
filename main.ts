@@ -45,6 +45,7 @@ function on_legal_tile (x: number, y: number) {
     return true
 }
 scene.onPathCompletion(SpriteKind.Player, function (sprite, location) {
+    InGame = false
     Done = true
 })
 function add_tile (tile: Sprite, x: number, y: number) {
@@ -52,10 +53,26 @@ function add_tile (tile: Sprite, x: number, y: number) {
     Tiles.push(tile)
     sprites.setDataBoolean(tile, "Road", true)
 }
+controller.down.onEvent(ControllerButtonEvent.Released, function () {
+    if (grid.getSprites(grid.getLocation(Cursor)).length > 2 && Selected) {
+        grid.move(SelectedTile, 0, -1)
+    }
+})
+controller.right.onEvent(ControllerButtonEvent.Released, function () {
+    if (grid.getSprites(grid.getLocation(Cursor)).length > 2 && Selected) {
+        grid.move(SelectedTile, -1, 0)
+    }
+})
+controller.left.onEvent(ControllerButtonEvent.Released, function () {
+    if (grid.getSprites(grid.getLocation(Cursor)).length > 2 && Selected) {
+        grid.move(SelectedTile, 1, 0)
+    }
+})
 function run_level (startx: number, starty: number, endx: number, endy: number) {
     grid.snap(Cursor)
     grid.moveWithButtons(Cursor)
     Cursor.setFlag(SpriteFlag.Invisible, false)
+    Car.setFlag(SpriteFlag.Invisible, false)
     scene.cameraFollowSprite(Cursor)
     InGame = true
     Done = false
@@ -66,6 +83,42 @@ function clear_tiles () {
         Tiles.removeAt(Tiles.indexOf(Sprite2))
     }
 }
+function level_2 () {
+    tiles.setTilemap(tiles.createTilemap(hex`0a0008000101010101010101010101010101010101010101010301010101010101010101010101010101010101010101010101010101010101010101010101010102010101010101010101010101010101010101`, img`
+        . . . . . . . . . . 
+        . . . . . . . . . . 
+        . . . . . . . . . . 
+        . . . . . . . . . . 
+        . . . . . . . . . . 
+        . . . . . . . . . . 
+        . . . . . . . . . . 
+        . . . . . . . . . . 
+        `, [myTiles.transparency16,myTiles.tile1,myTiles.tile4,myTiles.tile5], TileScale.Sixteen))
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 2, 2)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 3, 2)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 4, 2)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 5, 2)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 6, 2)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 7, 2)
+    add_tile(sprites.create(sprites.vehicle.roadTurn2, SpriteKind.Tile), 8, 2)
+    add_tile(sprites.create(sprites.vehicle.roadVertical, SpriteKind.Tile), 8, 3)
+    add_tile(sprites.create(sprites.vehicle.roadVertical, SpriteKind.Tile), 8, 4)
+    add_tile(sprites.create(sprites.vehicle.roadVertical, SpriteKind.Tile), 8, 5)
+    add_tile(sprites.create(sprites.vehicle.roadTurn4, SpriteKind.Tile), 8, 6)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 7, 6)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 6, 6)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 5, 6)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 4, 6)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 3, 6)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 2, 6)
+    tiles.placeOnRandomTile(Car, myTiles.tile5)
+    run_level(1, 2, 1, 6)
+}
+controller.up.onEvent(ControllerButtonEvent.Released, function () {
+    if (grid.getSprites(grid.getLocation(Cursor)).length > 2 && Selected) {
+        grid.move(SelectedTile, 0, 1)
+    }
+})
 function level_1 () {
     tiles.setTilemap(tiles.createTilemap(hex`0a0008000101010101010101010101010101010101010101010301010101010102010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101`, img`
         . . . . . . . . . . 
@@ -135,13 +188,94 @@ Car = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     `, SpriteKind.Player)
 Car.z = 5
+Car.setFlag(SpriteFlag.Invisible, true)
 Tiles = []
 InGame = false
 Selected = false
 Done = false
-level_1()
+level_2()
 game.onUpdate(function () {
     if (Selected) {
         grid.place(Cursor, grid.getLocation(SelectedTile))
+    }
+    if (Car.vx > 0) {
+        Car.setImage(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . 2 2 2 2 2 2 2 2 . . . . 
+            . . . 2 4 2 2 2 2 2 2 c 2 . . . 
+            . . 2 c 4 2 2 2 2 2 2 c c 2 . . 
+            . 2 c c 4 4 4 4 4 4 2 c c 4 2 d 
+            . 2 c 2 e e e e e e e b c 4 2 2 
+            . 2 2 e b b e b b b e e b 4 2 2 
+            . 2 e b b b e b b b b e 2 2 2 2 
+            . e e 2 2 2 e 2 2 2 2 2 e 2 2 2 
+            . e e e e e e f e e e f e 2 d d 
+            . e e e e e e f e e f e e e 2 d 
+            . e e e e e e f f f e e e e e e 
+            . e f f f f e e e e f f f e e e 
+            . . f f f f f e e f f f f f e . 
+            . . . f f f . . . . f f f f . . 
+            . . . . . . . . . . . . . . . . 
+            `)
+    }
+    if (Car.vx < 0) {
+        Car.setImage(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . 2 2 2 2 2 2 2 2 . . 
+            . . . . . 2 c 2 2 2 2 2 2 4 2 . 
+            . . . . 2 c c 2 2 2 2 2 2 4 c 2 
+            . . d 2 4 c c 2 4 4 4 4 4 4 c c 
+            . d 2 2 4 c b e e e e e e e 2 c 
+            . 2 2 2 4 b e e b b b e b b e 2 
+            . 2 2 2 2 2 e b b b b e b b b e 
+            . 2 2 2 2 e 2 2 2 2 2 e 2 2 2 e 
+            . 2 d d 2 e f e e e f e e e e e 
+            . d d 2 e e e f e e f e e e e e 
+            . e e e e e e e f f f e e e e e 
+            . e e e e f f f e e e e f f f f 
+            . . . e f f f f f e e f f f f f 
+            . . . . f f f f . . . . f f f . 
+            . . . . . . . . . . . . . . . . 
+            `)
+    }
+    if (Car.vy > 0) {
+        Car.setImage(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . . 2 2 2 2 2 2 . . . . 
+            . . . . . 2 2 4 4 2 2 2 2 . . . 
+            . . . . . c 4 2 2 2 2 2 c . . . 
+            . . . . 2 c 4 2 2 2 2 2 c 2 . . 
+            . . . e 2 c 4 2 2 2 2 2 c 2 e . 
+            . . . f 2 c 4 2 2 2 2 2 c 2 f . 
+            . . . f e c 2 2 2 2 2 2 c e f . 
+            . . . f 2 c 2 b b b b 2 c 2 f . 
+            . . . e 2 2 b c c c c b 2 2 e . 
+            . . . e e b c c c c c c b e e . 
+            . . . f e 4 4 4 4 4 4 4 4 e f . 
+            . . . f e d 2 2 2 2 2 2 d e f . 
+            . . . . 2 d d 2 2 2 2 d d 2 f . 
+            . . . . f 2 d 2 2 2 2 d 2 f . . 
+            . . . . . e 2 2 2 2 2 2 e . . . 
+            `)
+    }
+    if (Car.vy < 0) {
+        Car.setImage(img`
+            . . . . . . e e c c e e . . . . 
+            . . . . . e 2 2 2 2 2 2 e . . . 
+            . . . . 2 c 2 2 2 2 2 2 c 2 . . 
+            . . . e 2 c 4 2 2 2 2 2 c 2 e . 
+            . . . f 2 2 4 2 2 2 2 2 c 2 f . 
+            . . . f 2 2 4 2 2 2 2 2 2 2 f . 
+            . . . f 2 2 4 2 2 2 2 2 2 2 f . 
+            . . . f 2 c 2 4 4 2 2 2 c 2 f . 
+            . . . e 2 c e c c c c e c 2 e . 
+            . . . e 2 e c b b b b c e 2 e . 
+            . . . e 2 e b b b b b b e 2 e . 
+            . . . e e e e e e e e e e e e . 
+            . . . f e d e e e e e e d e f . 
+            . . . f e 2 d e e e e d 2 e f . 
+            . . . f f e e e e e e e e f f . 
+            . . . . f f . . . . . . f f . . 
+            `)
     }
 })
