@@ -3,23 +3,28 @@ namespace SpriteKind {
 }
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (InGame) {
-        for (let Location of tiles.getTilesByType(myTiles.tile1)) {
-            tiles.setWallAt(Location, !(sprites.readDataBoolean(grid.getSprites(Location)[0], "Road")))
-        }
-        Path = scene.aStar(tiles.getTilesByType(myTiles.tile5)[0], tiles.getTilesByType(myTiles.tile4)[0])
-        scene.followPath(Car, Path, 50)
-        if (!(scene.spriteIsFollowingPath(Car))) {
-            game.showLongText("Dang, the roads aren't connected!", DialogLayout.Bottom)
-        } else {
-            while (!(Done)) {
-                pause(100)
+        if (!(Selected)) {
+            for (let Location of tiles.getTilesByType(myTiles.tile1)) {
+                tiles.setWallAt(Location, !(sprites.readDataBoolean(grid.getSprites(Location)[0], "Road")))
             }
-            game.showLongText("You did it!", DialogLayout.Bottom)
+            Path = scene.aStar(tiles.getTilesByType(myTiles.tile5)[0], tiles.getTilesByType(myTiles.tile4)[0])
+            scene.followPath(Car, Path, 50)
+            if (!(scene.spriteIsFollowingPath(Car))) {
+                game.showLongText("Dang, the roads aren't connected!", DialogLayout.Bottom)
+            } else {
+                scene.cameraFollowSprite(Car)
+                while (!(Done)) {
+                    pause(100)
+                }
+                game.showLongText("You did it!", DialogLayout.Bottom)
+            }
+        } else {
+            game.showLongText("Please place down your tile!", DialogLayout.Bottom)
         }
     }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (InGame) {
+    if (InGame && !(scene.spriteIsFollowingPath(Car))) {
         if (!(Selected) && grid.getSprites(grid.getLocation(Cursor)).length > 1) {
             Selected = true
             Cursor.image.replace(1, 4)
@@ -97,10 +102,10 @@ function level_2 () {
     add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 2, 2)
     add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 3, 2)
     add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 4, 2)
-    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 5, 2)
+    add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 5, 4)
     add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 6, 2)
     add_tile(sprites.create(sprites.vehicle.roadHorizontal, SpriteKind.Tile), 7, 2)
-    add_tile(sprites.create(sprites.vehicle.roadTurn2, SpriteKind.Tile), 8, 2)
+    add_tile(sprites.create(sprites.vehicle.roadTurn2, SpriteKind.Tile), 8, 1)
     add_tile(sprites.create(sprites.vehicle.roadVertical, SpriteKind.Tile), 8, 3)
     add_tile(sprites.create(sprites.vehicle.roadVertical, SpriteKind.Tile), 8, 4)
     add_tile(sprites.create(sprites.vehicle.roadVertical, SpriteKind.Tile), 8, 5)
